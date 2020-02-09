@@ -1,7 +1,7 @@
 import time
 import json
 
-from bottle2 import  response, request, Bottle
+from bottle2 import response, request, Bottle
 
 
 def time_call(fonction):
@@ -18,6 +18,7 @@ def time_call(fonction):
 
 class Gift:
     instances = []
+
     def __init__(self, kind):
         print(f"creating {kind} gift")
         if kind == "small":
@@ -35,21 +36,20 @@ class Gift:
         else:
             raise ValueError(f"Error kind {kind} is unknown")
         self.instances.append(self)
-        self.status = 'new'
-        
+        self.status = "new"
+
     @time_call
     def wrap(self):
         print("Starting to wrap")
         time.sleep(self.duration)
         print("Wrapped a %s gift" % self.kind)
-        self.status = 'wrapped'
-        
+        self.status = "wrapped"
+
     def __str__(self):
         return f"{self.__class__.__name__}: {self.__dict__}"
 
     def __repr__(self):
         return str(self)
- 
 
 
 @time_call
@@ -85,21 +85,21 @@ class Sledge:
     def take_gift(self, gift):
         if gift.weight <= self.free_load:
             self.gifts.append(gift)
-            gift.status = 'ready'
+            gift.status = "ready"
             return 1
         else:
             return 0
-            gift.status = 'waiting'
+            gift.status = "waiting"
 
     @time_call
     def ship(self):
         print(f"Shipping {len(self)}")
         print(f"{self.load} kg to be shipped")
         for gift in self:
-            gift.status = 'shipping'
+            gift.status = "shipping"
         for gift in self:
             time.sleep(self.time_per_gift)
-            gift.status = 'delivered'
+            gift.status = "delivered"
         print(f"Shipped  {len(self)}")
         self.gifts = []
 
@@ -145,7 +145,7 @@ def create_gift_view(kind):
         if sledge.free_load == 0:
             message = f"sledge is full, shipping {sledge.gifts}"
             yield message
-            sledge.ship()            
+            sledge.ship()
     else:
         message = f"sledge is full, shipping {sledge.gifts}"
         yield message
@@ -208,7 +208,8 @@ def process_gifts(gifts):
         print("Last delivery")
         sledge.ship()
 
-@app.get('/gifts')
+
+@app.get("/gifts")
 def gifts():
     yield """
     <script language="javascript">
@@ -217,12 +218,10 @@ setInterval(function(){
 }, 500);
 </script>
     """
-    yield '<ul>'
+    yield "<ul>"
     for gift in Gift.instances:
         yield f"<li>{gift}</li>"
-    yield '</ul>'
-    
-
+    yield "</ul>"
 
 
 def create_and_process(gift_types):
@@ -232,15 +231,18 @@ def create_and_process(gift_types):
 from wsgiref.simple_server import make_server, WSGIServer
 from socketserver import ThreadingMixIn
 
-class ThreadingWSGIServer(ThreadingMixIn, WSGIServer): 
+
+class ThreadingWSGIServer(ThreadingMixIn, WSGIServer):
     pass
 
+
 if __name__ == "__main__":
-    httpd =  make_server('', 8080, app, ThreadingWSGIServer)
+    import sys
+
+    httpd = make_server("", sys.argv[2], app, ThreadingWSGIServer)
     try:
         httpd.serve_forever()
     except:
         httpd.shutdown()
         httpd.server_close()
-        #app.run(host="localhost", port=8080, debug=True)
-    
+        # app.run(host="localhost", port=8080, debug=True)
