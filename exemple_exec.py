@@ -68,7 +68,7 @@ def process_text():
         )
     ).split("\n"):
         yield "%s<br/>" % x
-
+    os.chdir("..")
     subprocess.call(shlex.split(f"docker run -p {port}:{port} -d demo_{number}"))
 
 
