@@ -56,16 +56,20 @@ def process_text():
     # module_name = f"{template_name}" % number
     with open(f"app.py", "w") as f:
         f.write(code)
+    port = str(8000 + number)
     with open(f"Dockerfile", "w") as f:
-        f.write(dockerfile_template.format(**{"port": str(8000 + number)}))
+        f.write(dockerfile_template.format(**{"port": port}))
     import subprocess
     import shlex
 
     for x in str(
-        subprocess.check_output(shlex.split(f"docker build -t demo_{number} ."))
+        subprocess.check_output(shlex.split(f"docker build -t demo_{number} .")).decode(
+            "utf-8"
+        )
     ).split("\n"):
         yield "%s<br/>" % x
-    subprocess.call()
+
+    subprocess.call(shlex.split(f"docker run -p {port}:{port} -d demo_{number}"))
 
 
 if __name__ == "__main__":
